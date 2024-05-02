@@ -1,0 +1,62 @@
+# Configuration for 'repo_helper' (https://github.com/repo-helper/repo_helper)
+---
+modname: 'mass-spec-viewer'
+copyright_years: '2024'
+author: 'Dominic Davis-Foster'
+email: 'dominic@davis-foster.co.uk'
+username: "GunShotMatch"
+assignee: "domdfcoding"
+version: '0.0.0'
+license: 'MIT'
+short_desc: 'Combined spectrum viewer and comparison tool.'
+
+enable_devmode: false
+enable_conda: false
+mypy_version: "1.8.0"
+# use_whey: true
+on_pypi: false
+enable_tests: false
+enable_docs: false
+
+python_versions:
+ 3.8:
+ 3.9:
+ "3.10":
+ "3.11":
+ "3.12":
+
+
+
+classifiers:
+ - 'Development Status :: 3 - Alpha'
+ - 'Intended Audience :: Developers'
+ - 'Topic :: Software Development :: Libraries :: Python Modules'
+
+
+# github_ci_requirements:
+#  Linux:
+#   post:
+#    - sudo add-apt-repository universe
+#    - sudo apt update
+#    - sudo apt install libhdf5-dev netcdf-bin libnetcdf-dev
+#  Windows:
+#   post:
+#    # Prefery binary wheels for older versions over sdists for newer ones
+#    - pip config set global.prefer-binary true
+
+# sphinx_html_theme: furo
+# standalone_contrib_guide: true
+
+# extra_sphinx_extensions:
+#   - enum_tools.autoenum
+#   - attr_utils.autoattrs
+#   - remove_factory_defaults
+#   - sphinx_toolbox.more_autosummary.column_widths
+
+# sphinx_conf_epilogue:
+#   - nitpicky = True
+#   - toctree_plus_types.update({"method", "attribute"})
+#   - autosummary_widths_builders = ["latex"]
+
+# tox_unmanaged:
+#  - pytest
