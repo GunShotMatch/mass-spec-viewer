@@ -28,6 +28,7 @@ Plotting functions.
 
 # stdlib
 import itertools
+import json
 from typing import Dict, List, cast
 
 # 3rd party
@@ -41,6 +42,8 @@ from matplotlib.figure import Figure  # type: ignore[import-untyped]
 from matplotlib.image import AxesImage  # type: ignore[import-untyped]
 from matplotlib.ticker import MultipleLocator  # type: ignore[import-untyped]
 from mpld3 import plugins
+from mpld3.mpld3renderer import MPLD3Renderer
+from mpld3.mplexporter import Exporter
 
 # this package
 from mass_spec_viewer.data import get_max_mass, get_similarity, get_top_masses_data, get_within_similarity
@@ -302,6 +305,26 @@ def format_top_masses_html_table(top_masses_data: TopMassesData) -> str:
 	return '\n'.join(output)
 
 
+def _fig_to_html(fig):
+	# 3rd party
+	from mpld3._display import GENERAL_HTML, NumpyEncoder
+
+	renderer = MPLD3Renderer()
+	Exporter(renderer, close_mpl=False).run(fig)
+
+	fig, figure_json, extra_css, extra_js = renderer.finished_figures[0]
+
+	return GENERAL_HTML.render(
+			figid=json.dumps("mass_spectra_d3"),
+			d3_url=mpld3.urls.D3_URL,
+			mpld3_url=mpld3.urls.MPLD3_URL,
+			figure_json=json.dumps(figure_json, cls=NumpyEncoder, indent=2),
+			extra_css=extra_css,
+			extra_js=extra_js,
+			include_libraries=True
+			)
+
+
 def draw_mass_spectrum(json_data: JSONData, peak_number: int, previous_file: str, next_file: str) -> str:
 
 	fig = plot_spectra(json_data)
@@ -342,7 +365,7 @@ def draw_mass_spectrum(json_data: JSONData, peak_number: int, previous_file: str
 	<body>
 	<a href="{previous_file}">Previous Peak</a>
 	<a href="{next_file}">Next Peak</a>
-	{mpld3.fig_to_html(fig)}
+	{_fig_to_html(fig)}
 	<p></p>
 	<div class="row">
 	<div class="column">
