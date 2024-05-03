@@ -29,29 +29,17 @@ Data gathering.
 # stdlib
 import itertools
 from collections import defaultdict
-from typing import (
-		Dict,
-		Iterator,
-		List,
-		MutableMapping,
-		MutableSequence,
-		NamedTuple,
-		Optional,
-		Tuple,
-		Type,
-		Union,
-		cast
-		)
+from typing import Dict, Iterator, List, MutableMapping, NamedTuple, Optional, Tuple, Type, Union, cast
 
 # 3rd party
 import numpy
 from chemistry_tools.spectrum_similarity import SpectrumSimilarity
-from gunshotmatch_reports.alignment import _max_peak_area
+from gunshotmatch_reports.alignment import CSVRow, _max_peak_area, get_csv_data
 from libgunshotmatch.consolidate import ConsolidatedPeak, combine_spectra
 from libgunshotmatch.project import Project
 
 # this package
-from mass_spec_viewer.types import IntensityList, JSONData, MassList, PeakData, TopMassesData
+from mass_spec_viewer.types import IntensityList, JSONData, MassList, PaddedPeakList, PeakData, TopMassesData
 
 if "TYPE_CHECKING":
 	# 3rd party
@@ -60,6 +48,7 @@ if "TYPE_CHECKING":
 __all__ = [
 		"PeakInfo",
 		"SimilarityScores",
+		"csv_reports",
 		"get_max_mass",
 		"get_similarity",
 		"get_spectra_data",
@@ -346,16 +335,13 @@ def get_top_masses_data(json_data: JSONData) -> TopMassesData:
 	return top_masses_data
 
 
-_PaddedPeakList = MutableSequence[Optional[ConsolidatedPeak]]
-
-
 def get_spectra_data(
 		p1: Project,
-		padded_p1_cp: _PaddedPeakList,
+		padded_p1_cp: PaddedPeakList,
 		p2: Project,
-		padded_p2_cp: _PaddedPeakList,
+		padded_p2_cp: PaddedPeakList,
 		u: Project,
-		padded_unkn_cp: _PaddedPeakList,
+		padded_unkn_cp: PaddedPeakList,
 		) -> Iterator[JSONData]:
 
 	p1_max_pa = _max_peak_area(p1)
@@ -417,3 +403,37 @@ def get_spectra_data(
 				peak_info[project.name] = project_peak_data
 
 		yield {"row": idx + 3, "peak": peak_info, "ms": ms_data}
+
+
+def csv_reports(
+		p1: Project,
+		padded_p1_cp: PaddedPeakList,
+		p2: Project,
+		padded_p2_cp: PaddedPeakList,
+		u: Project,
+		padded_unkn_cp: PaddedPeakList,
+		):
+
+	p1_max_pa = _max_peak_area(p1)
+	p2_max_pa = _max_peak_area(p2)
+	unkn_max_pa = _max_peak_area(u)
+
+	top_row_pad = ('', ) * (5)
+	csv_header = [
+			('', p1.name, *top_row_pad, u.name, *top_row_pad, p2.name, *top_row_pad),
+			('', ) + CSVRow.header() * 3,
+			]
+	csv_data = []
+
+	for idx, (cp1, cp2, cpu) in enumerate(zip(padded_p1_cp, padded_p2_cp, padded_unkn_cp)):
+		idx += 3
+
+		cp1_data = get_csv_data(p1, cp1, p1_max_pa)
+		cp2_data = get_csv_data(p2, cp2, p2_max_pa)
+		unknown_data = get_csv_data(u, cpu, unkn_max_pa)
+
+		row = [idx, *cp1_data, *unknown_data, *cp2_data]
+
+		csv_data.append((row, sum(tuple(map(all, [cp1_data, cp2_data, unknown_data]))) >= 2))
+
+	return csv_header, csv_data
