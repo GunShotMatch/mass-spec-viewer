@@ -153,24 +153,18 @@ class SimilarityScores(NamedTuple):
 			experimental_spectra: _ExpRefSpectra,
 			reference_spectra: _ExpRefSpectra,
 			) -> Iterator[Tuple[str, str, float, float]]:
-		forward_scores: Dict[str, Dict[str, float]] = defaultdict(dict)
-		reverse_scores: Dict[str, Dict[str, float]] = defaultdict(dict)
-
-		def fill(sample_name: str, reference_sample_name: str) -> None:
-			forward_scores[sample_name][reference_sample_name] = fillvalue
-			reverse_scores[sample_name][reference_sample_name] = fillvalue
 
 		# fillvalue = None
 		fillvalue = -1
 		for sample_name, sample_ms in experimental_spectra.items():
 			if sample_ms is None:
 				for reference_sample_name, reference_ms in reference_spectra.items():
-					fill(sample_name, reference_sample_name)
+					yield sample_name, reference_sample_name, fillvalue, fillvalue
 				continue
 
 			for reference_sample_name, reference_ms in reference_spectra.items():
 				if reference_ms is None:
-					fill(sample_name, reference_sample_name)
+					yield sample_name, reference_sample_name, fillvalue, fillvalue
 					continue
 
 				# print(sample_name, "/", reference_sample_name)
@@ -252,11 +246,12 @@ def get_within_similarity(json_data: JSONData) -> SimilarityScores:
 		# 		rmf *= 1000
 
 		if sample_name == reference_sample_name:
-			assert numpy.isclose(mf, 1000, atol=0.01)
-			assert numpy.isclose(rmf, 1000, atol=0.01), (mf, rmf)
-			forward_scores[sample_name][reference_sample_name] = -2
-			reverse_scores[sample_name][reference_sample_name] = -2
-			continue
+			if mf != -1 and rmf != -1:
+				assert numpy.isclose(mf, 1000, atol=0.01), mf
+				assert numpy.isclose(rmf, 1000, atol=0.01), rmf
+				forward_scores[sample_name][reference_sample_name] = -2
+				reverse_scores[sample_name][reference_sample_name] = -2
+				continue
 
 		forward_scores[sample_name][reference_sample_name] = mf
 		reverse_scores[sample_name][reference_sample_name] = rmf
