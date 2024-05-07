@@ -39,7 +39,15 @@ from libgunshotmatch.consolidate import ConsolidatedPeak, combine_spectra
 from libgunshotmatch.project import Project
 
 # this package
-from mass_spec_viewer.types import IntensityList, JSONData, MassList, PaddedPeakList, PeakData, TopMassesData
+from mass_spec_viewer.types import (
+		CSVReportRow,
+		IntensityList,
+		JSONData,
+		MassList,
+		PaddedPeakList,
+		PeakData,
+		TopMassesData
+		)
 
 if "TYPE_CHECKING":
 	# 3rd party
@@ -124,6 +132,10 @@ _ExpRefSpectra = Dict[str, Optional[numpy.ndarray]]
 
 
 class SimilarityScores(NamedTuple):
+	"""
+	Matrix of mass spectrum similarity scores between experimental and reference spectra.
+	"""
+
 	forward_scores: Dict[str, Dict[str, float]]
 	reverse_scores: Dict[str, Dict[str, float]]
 
@@ -132,6 +144,7 @@ class SimilarityScores(NamedTuple):
 		experimental_spectra = {k: numpy.array(v).transpose() for k, v in json_data["ms"].items()}
 		return {k: v if v.size else None for k, v in experimental_spectra.items()}
 
+	@staticmethod
 	def _get_reference_spectra(json_data: JSONData) -> _ExpRefSpectra:
 
 		reference_spectra: _ExpRefSpectra = {}
@@ -174,6 +187,11 @@ class SimilarityScores(NamedTuple):
 
 
 def get_similarity(json_data: JSONData) -> SimilarityScores:
+	"""
+	Calculate matrix of mass spectrum similarity scores between experimental and reference spectra.
+
+	:param json_data:
+	"""
 
 	experimental_spectra = SimilarityScores._get_experimental_spectra(json_data)
 	reference_spectra = SimilarityScores._get_reference_spectra(json_data)
@@ -215,6 +233,12 @@ def get_similarity(json_data: JSONData) -> SimilarityScores:
 
 
 def get_within_similarity(json_data: JSONData) -> SimilarityScores:
+	"""
+	Calculate matrix of mass spectrum similarity scores between experimental spectra.
+
+	:param json_data:
+	"""
+
 	experimental_spectra = SimilarityScores._get_experimental_spectra(json_data)
 
 	forward_scores: Dict[str, Dict[str, float]] = defaultdict(dict)
@@ -407,17 +431,17 @@ def csv_reports(
 		padded_p2_cp: PaddedPeakList,
 		u: Project,
 		padded_unkn_cp: PaddedPeakList,
-		):
+		) -> Tuple[Tuple[CSVReportRow, CSVReportRow], List[Tuple[CSVReportRow, bool]]]:
 
 	p1_max_pa = _max_peak_area(p1)
 	p2_max_pa = _max_peak_area(p2)
 	unkn_max_pa = _max_peak_area(u)
 
 	top_row_pad = ('', ) * (5)
-	csv_header = [
+	csv_header = (
 			('', p1.name, *top_row_pad, u.name, *top_row_pad, p2.name, *top_row_pad),
 			('', ) + CSVRow.header() * 3,
-			]
+			)
 	csv_data = []
 
 	for idx, (cp1, cp2, cpu) in enumerate(zip(padded_p1_cp, padded_p2_cp, padded_unkn_cp)):
@@ -427,7 +451,7 @@ def csv_reports(
 		cp2_data = get_csv_data(p2, cp2, p2_max_pa)
 		unknown_data = get_csv_data(u, cpu, unkn_max_pa)
 
-		row = [idx, *cp1_data, *unknown_data, *cp2_data]
+		row: CSVReportRow = (str(idx), *cp1_data, *unknown_data, *cp2_data)
 
 		csv_data.append((row, sum(tuple(map(all, [cp1_data, cp2_data, unknown_data]))) >= 2))
 
