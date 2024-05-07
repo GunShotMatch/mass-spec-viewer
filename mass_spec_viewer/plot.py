@@ -35,6 +35,7 @@ from typing import Dict, List, cast
 # 3rd party
 import mpld3  # type: ignore[import-untyped]
 import numpy
+from domdf_python_tools.stringlist import StringList
 from matplotlib import cm as colourmaps  # type: ignore[import-untyped]
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes  # type: ignore[import-untyped]
@@ -343,54 +344,73 @@ def draw_mass_spectrum(json_data: JSONData, peak_number: int, previous_file: str
 	fig = plot_spectra(json_data)
 
 	# fig.savefig(spectrum_basename.with_suffix(".png"))
+	project_names = list(json_data["peak"])
+	page_title = f"Row {json_data['row']} – " + " / ".join(project_names)
 
-	html_output = f"""\
-	<!DOCTYPE html>
-	<html lang='en'>
-	<head>
-	<meta charset='utf-8'>
-	<script>
-	document.addEventListener('keydown', (event) => {{
-		switch (event.key) {{
-		case "ArrowLeft":
-			window.location.href = '{previous_file}';
-			break;
-		case "ArrowRight":
-			window.location.href = '{next_file}';
-			break;
-		}}
-	}});
-	</script>
-	<style>
-	.column {{
-	float: left;
-	width: 50%;
-	}}
+	html_output = StringList()
+	html_output.set_indent_type("  ")
+	html_output.extend([
+			"<!DOCTYPE html>",
+			"<html lang='en'>",
+			"<head>",
+			"  <meta charset='utf-8'>",
+			f"  <title>{page_title}</title>",
+			"  <style>",
+			"    body {",
+			'      font-family: "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";',
+			"    }",
+			"    .column {",
+			"      float: left;",
+			"      width: 50%;",
+			"    }",
+			"    .row:after {",
+			'      content: "";',
+			"      display: table;",
+			"      clear: both;",
+			"    }",
+			"  </style>",
+			"</head>",
+			"<body>",
+			])
 
-	/* Clear floats after the columns */
-	.row:after {{
-	content: "";
-	display: table;
-	clear: both;
-	}}
-	</style>
-	</head>
-	<body>
-	<a href="{previous_file}">Previous Peak</a>
-	<a href="{next_file}">Next Peak</a>
-	{_fig_to_html(fig)}
-	<p></p>
-	<div class="row">
-	<div class="column">
-		<img src="{peak_number}.matrix.png" width="800px" height="880px">
-	</div>
-	<div class="column">
-		{format_top_masses_html_table(get_top_masses_data(json_data))}
-	</div>
-	</div>
-	</body>
-	</html>
-	"""
+	with html_output.with_indent_size(1):
+		html_output.extend([
+				'  <a href="index.html">Home</a>',
+				f'  <a href="{previous_file}">Previous Peak</a>',
+				f'  <a href="{next_file}">Next Peak</a>',
+				])
 
+		html_output.extend(_fig_to_html(fig).splitlines()),
+
+	html_output.extend([
+			"  <p></p>",
+			'  <div class="row">',
+			'    <div class="column">',
+			f'      <img src="{peak_number}.matrix.png" width="800px" height="880px">',
+			"    </div>",
+			'    <div class="column">',
+			])
+
+	with html_output.with_indent_size(2):
+		html_output.extend(format_top_masses_html_table(get_top_masses_data(json_data)).splitlines())
+
+	html_output.extend([
+			"    </div>",
+			"  </div>",
+			"  <script>",
+			"    document.addEventListener('keydown', (event) => {",
+			"      switch (event.key) {",
+			'        case "ArrowLeft":',
+			f"          window.location.href = '{previous_file}';",
+			"          break;",
+			'        case "ArrowRight":',
+			f"          window.location.href = '{next_file}';",
+			"          break;",
+			"      }",
+			"    });",
+			"  </script>",
+			"</body>",
+			"</html>",
+			])
 	plt.close(fig)
-	return html_output
+	return str(html_output)
