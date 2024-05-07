@@ -29,6 +29,7 @@ Plotting functions.
 # stdlib
 import itertools
 import json
+import re
 from typing import Dict, List, cast
 
 # 3rd party
@@ -42,8 +43,8 @@ from matplotlib.figure import Figure  # type: ignore[import-untyped]
 from matplotlib.image import AxesImage  # type: ignore[import-untyped]
 from matplotlib.ticker import MultipleLocator  # type: ignore[import-untyped]
 from mpld3 import plugins
-from mpld3.mpld3renderer import MPLD3Renderer
-from mpld3.mplexporter import Exporter
+from mpld3.mpld3renderer import MPLD3Renderer  # type: ignore[import-untyped]
+from mpld3.mplexporter import Exporter  # type: ignore[import-untyped]
 
 # this package
 from mass_spec_viewer.data import get_max_mass, get_similarity, get_top_masses_data, get_within_similarity
@@ -305,20 +306,32 @@ def format_top_masses_html_table(top_masses_data: TopMassesData) -> str:
 	return '\n'.join(output)
 
 
-def _fig_to_html(fig):
+def _fig_to_html(fig: Figure) -> str:
 	# 3rd party
-	from mpld3._display import GENERAL_HTML, NumpyEncoder
+	from mpld3._display import GENERAL_HTML, NumpyEncoder  # type: ignore[import-untyped]
 
 	renderer = MPLD3Renderer()
 	Exporter(renderer, close_mpl=False).run(fig)
 
 	fig, figure_json, extra_css, extra_js = renderer.finished_figures[0]
 
+	figure_json = json.dumps(figure_json, cls=NumpyEncoder, indent=2)
+	current_id = 0
+	id_map = {}
+	for m in re.finditer('"id": "(el.*)"', figure_json):
+		element_id = m[1]
+		if element_id not in id_map:
+			id_map[element_id] = current_id
+			current_id += 1
+
+	for old_id, new_id in id_map.items():
+		figure_json = figure_json.replace(old_id, f"el{new_id}")
+
 	return GENERAL_HTML.render(
 			figid=json.dumps("mass_spectra_d3"),
 			d3_url=mpld3.urls.D3_URL,
 			mpld3_url=mpld3.urls.MPLD3_URL,
-			figure_json=json.dumps(figure_json, cls=NumpyEncoder, indent=2),
+			figure_json=figure_json,
 			extra_css=extra_css,
 			extra_js=extra_js,
 			include_libraries=True
