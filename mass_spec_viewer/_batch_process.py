@@ -83,7 +83,7 @@ def get_spectra_data(
 			):
 		idx = json_data["row"]
 		json_filename = output_dir / f"{idx}_spectra.json"
-		json_filename.write_clean(sdjson.dumps(data, indent=2))
+		json_filename.write_clean(sdjson.dumps(json_data, indent=2))
 
 
 def make_csv_reports(
