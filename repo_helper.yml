@@ -66,3 +66,6 @@ manifest_additional:
 
 additional_ignore:
  - test_output
+
+console_scripts:
+  - mass-spec-viewer = mass_spec_viewer.__main__:main
