@@ -54,6 +54,7 @@ python-implementations = [ "CPython",]
 platforms = [ "Windows", "macOS", "Linux",]
 license-key = "MIT"
 package = "mass_spec_viewer"
+additional-files = [ "recursive-include mass_spec_viewer/css *.css",]
 
 [tool.importcheck]
 

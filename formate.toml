@@ -27,7 +27,21 @@ lines_between_types = 0
 use_parentheses = true
 remove_redundant_aliases = true
 default_section = "THIRDPARTY"
-known_third_party = []
+known_third_party = [
+    "chemistry_tools",
+    "click",
+    "consolekit",
+    "domdf_python_tools",
+    "gunshotmatch_pipeline",
+    "gunshotmatch_reports",
+    "libgunshotmatch",
+    "matplotlib",
+    "mpld3",
+    "natsort",
+    "numpy",
+    "sdjson",
+    "tqdm",
+]
 known_first_party = [ "mass_spec_viewer",]
 
 [config]

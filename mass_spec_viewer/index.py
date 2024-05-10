@@ -34,9 +34,23 @@ from domdf_python_tools.stringlist import StringList
 
 __all__ = ["create_index_page"]
 
+BOOTSTRAP_CSS_URL = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous'
 
-def create_index_page(project_names: List[str], table_data: List[Tuple[int, List[Tuple[str, str]]]]):
-	# Table data: first row element is row number, 2nd is list of tuples of retention time and compound name
+
+def create_index_page(
+		project_names: List[str],
+		table_data: List[Tuple[int, List[Tuple[str, str]]]],
+		*,
+		bootstrap_css_url: str = BOOTSTRAP_CSS_URL,
+		) -> str:
+	"""
+	Create an ``index.html`` page with an overview table of compounds and retention times.
+
+	:param project_names:
+	:param table_data: For each tuple the first element is the row number,
+		the second is list of tuples of (retention time, compound name).
+	:param bootstrap_css_url: Optional URL for boostrap css. May include additional HTML attributes for the ``link`` tag.
+	"""
 
 	page_title = " / ".join(project_names)
 	index_html_output = StringList()
@@ -47,7 +61,7 @@ def create_index_page(project_names: List[str], table_data: List[Tuple[int, List
 			"<head>",
 			"  <meta charset='utf-8'>",
 			f"  <title>{page_title}</title>",
-			'  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">',
+			f'  <link href="{bootstrap_css_url}" rel="stylesheet">',
 			"  <style>",
 			"    table.table tbody tr td.row-idx, table.table tbody tr td.compound {",
 			"      border-right: 1px solid rgb(222, 226, 230);",

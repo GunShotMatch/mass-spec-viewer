@@ -307,7 +307,7 @@ def format_top_masses_html_table(top_masses_data: TopMassesData) -> str:
 	return '\n'.join(output)
 
 
-def _fig_to_html(fig: Figure) -> str:
+def _fig_to_html(fig: Figure, d3_url: str, mpld3_url: str) -> str:
 	# 3rd party
 	from mpld3._display import GENERAL_HTML, NumpyEncoder  # type: ignore[import-untyped]
 
@@ -329,9 +329,9 @@ def _fig_to_html(fig: Figure) -> str:
 		figure_json = figure_json.replace(old_id, f"el{new_id}")
 
 	return GENERAL_HTML.render(
-			figid=json.dumps("mass_spectra_d3"),
-			d3_url=mpld3.urls.D3_URL,
-			mpld3_url=mpld3.urls.MPLD3_URL,
+			figid='"mass_spectra_d3"',
+			d3_url=d3_url,
+			mpld3_url=mpld3_url,
 			figure_json=figure_json,
 			extra_css=extra_css,
 			extra_js=extra_js,
@@ -339,7 +339,25 @@ def _fig_to_html(fig: Figure) -> str:
 			)
 
 
-def draw_mass_spectrum(json_data: JSONData, peak_number: int, previous_file: str, next_file: str) -> str:
+def draw_mass_spectrum(
+		json_data: JSONData,
+		peak_number: int,
+		previous_file: str,
+		next_file: str,
+		*,
+		d3_url: str = mpld3.urls.D3_URL,
+		mpld3_url: str = mpld3.urls.MPLD3MIN_URL,
+		) -> str:
+	"""
+	Generate HTML page with mass spectra, top peaks table and similarity matrices.
+
+	:param json_data:
+	:param peak_number:
+	:param previous_file:
+	:param next_file:
+	:param d3_url: The URL of the d3 library.  If not specified, a standard web path will be used.
+	:param mpld3_url: The URL of the mpld3 library.  If not specified, a standard web path will be used.
+	"""
 
 	fig = plot_spectra(json_data)
 
@@ -380,7 +398,7 @@ def draw_mass_spectrum(json_data: JSONData, peak_number: int, previous_file: str
 				f'  <a href="{next_file}">Next Peak</a>',
 				])
 
-		html_output.extend(_fig_to_html(fig).splitlines()),
+		html_output.extend(_fig_to_html(fig, d3_url=d3_url, mpld3_url=mpld3_url).splitlines())
 
 	html_output.extend([
 			"  <p></p>",

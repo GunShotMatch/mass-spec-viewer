@@ -362,6 +362,19 @@ def get_spectra_data(
 		u: Project,
 		padded_unkn_cp: PaddedPeakList,
 		) -> Iterator[JSONData]:
+	"""
+	Get spectra data for each peak in the aligned projects and unknown.
+
+	:param p1: The first project
+	:param padded_p1_cp: List of consolidated peaks for the first project,
+		padded to align with the other project's and the unknown's.
+	:param p2: The first project
+	:param padded_p2_cp: List of consolidated peaks for the second project,
+		padded to align with the other project's and the unknown's.
+	:param u: The unknown sample
+	:param padded_unkn_cp: List of consolidated peaks for the unknown,
+		padded to align with the projects'.
+	"""
 
 	p1_max_pa = _max_peak_area(p1)
 	p2_max_pa = _max_peak_area(p2)

@@ -60,3 +60,9 @@ classifiers:
 
 # tox_unmanaged:
 #  - pytest
+
+manifest_additional:
+  - "recursive-include mass_spec_viewer/css *.css"
+
+additional_ignore:
+ - test_output
