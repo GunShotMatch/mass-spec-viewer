@@ -44,6 +44,15 @@ package = "mass_spec_viewer"
 additional-files = [ "recursive-include mass_spec_viewer/css *.css", "include mass_spec_viewer/css/LICENSE",]
 
 [tool.importcheck]
+always = [
+    "mass_spec_viewer.__init__",
+    "mass_spec_viewer.__main__",
+    "mass_spec_viewer._batch_process",
+    "mass_spec_viewer.data",
+    "mass_spec_viewer.index",
+    "mass_spec_viewer.plot",
+    "mass_spec_viewer.types",
+]
 
 [tool.mypy]
 python_version = "3.8"
