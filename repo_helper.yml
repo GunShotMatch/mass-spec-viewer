@@ -13,7 +13,7 @@ short_desc: 'Combined spectrum viewer and comparison tool.'
 enable_devmode: false
 enable_conda: false
 mypy_version: "1.8.0"
-# use_whey: true
+use_whey: true
 on_pypi: false
 enable_tests: false
 enable_docs: false
@@ -63,6 +63,7 @@ classifiers:
 
 manifest_additional:
   - "recursive-include mass_spec_viewer/css *.css"
+  - "include mass_spec_viewer/css/LICENSE"
 
 additional_ignore:
  - test_output
