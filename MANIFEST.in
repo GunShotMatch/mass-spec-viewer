@@ -2,5 +2,6 @@ include LICENSE
 include requirements.txt
 prune **/__pycache__
 recursive-include mass_spec_viewer/css *.css
+include mass_spec_viewer/css/LICENSE
 recursive-include mass_spec_viewer *.pyi
 include mass_spec_viewer/py.typed
