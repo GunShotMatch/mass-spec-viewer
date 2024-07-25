@@ -29,7 +29,7 @@ Data gathering.
 # stdlib
 import itertools
 from collections import defaultdict
-from typing import Dict, Iterator, List, MutableMapping, NamedTuple, Optional, Tuple, Type, Union, cast
+from typing import Dict, Iterator, List, MutableMapping, NamedTuple, Optional, Sequence, Tuple, Type, Union, cast
 
 # 3rd party
 import numpy
@@ -354,13 +354,16 @@ def get_top_masses_data(json_data: JSONData) -> TopMassesData:
 	return top_masses_data
 
 
+_Spectrum = Tuple[List[int], List[float]]
+
+
 def get_spectra_data(
 		p1: Project,
 		padded_p1_cp: PaddedPeakList,
 		p2: Project,
 		padded_p2_cp: PaddedPeakList,
-		u: Project,
-		padded_unkn_cp: PaddedPeakList,
+		u: Optional[Project] = None,
+		padded_unkn_cp: Optional[PaddedPeakList] = None,
 		) -> Iterator[JSONData]:
 	"""
 	Get spectra data for each peak in the aligned projects and unknown.
@@ -378,63 +381,96 @@ def get_spectra_data(
 
 	p1_max_pa = _max_peak_area(p1)
 	p2_max_pa = _max_peak_area(p2)
-	unkn_max_pa = _max_peak_area(u)
+	ms_data: Dict[str, Tuple[MassList, IntensityList]]
+	peak_info: MutableMapping[str, Optional[PeakData]]
 
-	for idx, (p1_peak, p2_peak, unkn_peak) in enumerate(zip(padded_p1_cp, padded_p2_cp, padded_unkn_cp)):
-		if sum([peak is not None for peak in [p1_peak, p2_peak, unkn_peak]]) < 2:
-			continue
+	if u:
+		assert padded_unkn_cp is not None
 
-		# fig, axes = plt.subplots(3, 1, figsize=(8, 12), layout="constrained")
+		unkn_max_pa = _max_peak_area(u)
 
-		combined_spectra = []
-		max_mass = 0
-		# for ax, peak in zip(axes, (p1_peak, unkn_peak, p2_peak)):
+		for idx, (p1_peak, p2_peak, unkn_peak) in enumerate(zip(padded_p1_cp, padded_p2_cp, padded_unkn_cp)):
+			if sum([peak is not None for peak in [p1_peak, p2_peak, unkn_peak]]) < 2:
+				continue
 
-		peak: Optional[ConsolidatedPeak]
-		for peak in (p1_peak, unkn_peak, p2_peak):
+			p1_combined_spectrum, unkn_combined_spectrum, p2_combined_spectrum = _get_combined_spectra((p1_peak, unkn_peak, p2_peak))
 
-			combined_spectrum: Tuple[List[int], List[float]]
-			if peak is None:
-				combined_spectrum = [], []
-				# ax.set_xlabel("m/z")
-				# ax.set_ylabel("Intensity")
-			else:
-				combined_spectrum = combine_spectra(peak)
-				# draw_ms(fig, ax, *combined_spectrum)
-				max_mass = max(max_mass, get_max_mass(*combined_spectrum))
+			# for ax in axes:
+			# 	ax.set_xlim(45, max_mass+5)
 
-			combined_spectra.append(combined_spectrum)
+			ms_data = {}
+			peak_info = {}
 
-		p1_combined_spectrum, unkn_combined_spectrum, p2_combined_spectrum = combined_spectra
+			for project, peak, spec, max_area in [
+				(p1, p1_peak, p1_combined_spectrum, p1_max_pa),
+				(u, unkn_peak, unkn_combined_spectrum, unkn_max_pa),
+				(p2, p2_peak, p2_combined_spectrum, p2_max_pa),
+				]:
+				assert project.consolidated_peaks is not None
 
-		# for ax in axes:
-		# 	ax.set_xlim(45, max_mass+5)
+				ms_data[project.name] = spec
+				peak_info[project.name] = _peak_data_for_peak(project, peak, max_area)
 
-		ms_data: Dict[str, Tuple[MassList, IntensityList]] = {}
-		peak_info: MutableMapping[str, Optional[PeakData]] = {}
+			yield {"row": idx + 3, "peak": peak_info, "ms": ms_data}
 
-		for project, peak, spec, max_area in [
-			(p1, p1_peak, p1_combined_spectrum, p1_max_pa),
-			(u, unkn_peak, unkn_combined_spectrum, unkn_max_pa),
-			(p2, p2_peak, p2_combined_spectrum, p2_max_pa),
-			]:
-			assert project.consolidated_peaks is not None
+	else:
 
-			ms_data[project.name] = spec
+		for idx, (p1_peak, p2_peak) in enumerate(zip(padded_p1_cp, padded_p2_cp)):
+			# fig, axes = plt.subplots(3, 1, figsize=(8, 12), layout="constrained")
 
-			if peak is None:
-				peak_info[project.name] = None
-			else:
+			p1_combined_spectrum, p2_combined_spectrum = _get_combined_spectra((p1_peak, p2_peak))
 
-				project_peak_info = PeakInfo.for_peak(
-						peak,
-						project.consolidated_peaks.index(peak) + 1,
-						max_area,
-						)
-				project_peak_data = project_peak_info.to_dict()
-				peak_info[project.name] = project_peak_data
+			# for ax in axes:
+			# 	ax.set_xlim(45, max_mass+5)
 
-		yield {"row": idx + 3, "peak": peak_info, "ms": ms_data}
+			ms_data = {}
+			peak_info = {}
+
+			for project, peak, spec, max_area in [
+				(p1, p1_peak, p1_combined_spectrum, p1_max_pa),
+				(p2, p2_peak, p2_combined_spectrum, p2_max_pa),
+				]:
+				assert project.consolidated_peaks is not None
+
+				ms_data[project.name] = spec
+				peak_info[project.name] = _peak_data_for_peak(project, peak, max_area)
+
+			yield {"row": idx + 3, "peak": peak_info, "ms": ms_data}
+
+
+def _peak_data_for_peak(
+		project: Project,
+		peak: Optional[ConsolidatedPeak],
+		max_area: float,
+		) -> Optional[PeakData]:
+	assert project.consolidated_peaks is not None
+
+	if peak is None:
+		return None
+	else:
+
+		project_peak_info = PeakInfo.for_peak(
+				peak,
+				project.consolidated_peaks.index(peak) + 1,
+				max_area,
+				)
+		project_peak_data = project_peak_info.to_dict()
+		return project_peak_data
+
+
+def _get_csv_header(p1: Project, p2: Project, u: Optional[Project]) -> Tuple[CSVReportRow, CSVReportRow]:
+	top_row_pad = ('', ) * (5)
+
+	if u:
+		return (
+				('', p1.name, *top_row_pad, u.name, *top_row_pad, p2.name, *top_row_pad),
+				('', ) + CSVRow.header() * 3,
+				)
+	else:
+		return (
+				('', p1.name, *top_row_pad, p2.name, *top_row_pad, '', *top_row_pad),
+				('', ) + CSVRow.header() * 3,
+				)
 
 
 def csv_reports(
@@ -442,30 +478,59 @@ def csv_reports(
 		padded_p1_cp: PaddedPeakList,
 		p2: Project,
 		padded_p2_cp: PaddedPeakList,
-		u: Project,
-		padded_unkn_cp: PaddedPeakList,
+		u: Optional[Project] = None,
+		padded_unkn_cp: Optional[PaddedPeakList] = None,
 		) -> Tuple[Tuple[CSVReportRow, CSVReportRow], List[Tuple[CSVReportRow, bool]]]:
 
 	p1_max_pa = _max_peak_area(p1)
 	p2_max_pa = _max_peak_area(p2)
-	unkn_max_pa = _max_peak_area(u)
 
-	top_row_pad = ('', ) * (5)
-	csv_header = (
-			('', p1.name, *top_row_pad, u.name, *top_row_pad, p2.name, *top_row_pad),
-			('', ) + CSVRow.header() * 3,
-			)
+	if u:
+		unkn_max_pa = _max_peak_area(u)
+	else:
+		padded_unkn_cp = [None] * len(padded_p1_cp)
+
+	csv_header = _get_csv_header(p1, p2, u)
 	csv_data = []
+
+	assert padded_unkn_cp is not None
 
 	for idx, (cp1, cp2, cpu) in enumerate(zip(padded_p1_cp, padded_p2_cp, padded_unkn_cp)):
 		idx += 3
 
 		cp1_data = get_csv_data(p1, cp1, p1_max_pa)
 		cp2_data = get_csv_data(p2, cp2, p2_max_pa)
-		unknown_data = get_csv_data(u, cpu, unkn_max_pa)
 
-		row: CSVReportRow = (str(idx), *cp1_data, *unknown_data, *cp2_data)
-
-		csv_data.append((row, sum(tuple(map(all, [cp1_data, cp2_data, unknown_data]))) >= 2))
+		row: CSVReportRow
+		if u:
+			unknown_data = get_csv_data(u, cpu, unkn_max_pa)
+			row = (str(idx), *cp1_data, *unknown_data, *cp2_data)
+			csv_data.append((row, sum(tuple(map(all, [cp1_data, cp2_data, unknown_data]))) >= 2))
+		else:
+			row = (str(idx), *cp1_data, *cp2_data, '', '', '', '', '', '')
+			csv_data.append((row, True))
 
 	return csv_header, csv_data
+
+
+def _get_combined_spectra(peaks: Sequence[Optional[ConsolidatedPeak]]) -> List[_Spectrum]:
+	combined_spectra = []
+	max_mass = 0
+	# for ax, peak in zip(axes, (p1_peak, unkn_peak, p2_peak)):
+
+	peak: Optional[ConsolidatedPeak]
+	for peak in peaks:
+
+		combined_spectrum: _Spectrum
+		if peak is None:
+			combined_spectrum = [], []
+			# ax.set_xlabel("m/z")
+			# ax.set_ylabel("Intensity")
+		else:
+			combined_spectrum = combine_spectra(peak)
+			# draw_ms(fig, ax, *combined_spectrum)
+			max_mass = max(max_mass, get_max_mass(*combined_spectrum))
+
+		combined_spectra.append(combined_spectrum)
+
+	return combined_spectra

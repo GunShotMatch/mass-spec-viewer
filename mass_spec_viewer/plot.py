@@ -134,7 +134,7 @@ def draw_ms(ax: Axes, mass_list: List[int], intensity_list: List[float]) -> BarC
 def plot_spectra(json_data: JSONData) -> Figure:
 
 	# fig, axes = plt.subplots(3, 2, figsize=(16.5, 11.7), layout="constrained")
-	fig, axes = plt.subplots(3, 2, figsize=(16.5, 9), layout="constrained")
+	fig, axes = plt.subplots(len(json_data["peak"]), 2, figsize=(16.5, 9), layout="constrained")
 	experimental_axes: List[Axes] = axes[:, 0]  # Left column
 	reference_axes: List[Axes] = axes[:, 1]  # Right column
 

@@ -30,7 +30,7 @@ Internal CLI utils.
 import concurrent.futures
 import csv
 import io
-from typing import List, TypedDict
+from typing import List, Optional, TypedDict
 
 # 3rd party
 import mpld3.urls  # type: ignore[import-untyped]
@@ -66,12 +66,14 @@ def get_spectra_data(
 		padded_p1_cp: PaddedPeakList,
 		p2: Project,
 		padded_p2_cp: PaddedPeakList,
-		u: Project,
-		padded_unkn_cp: PaddedPeakList,
+		u: Optional[Project] = None,
+		padded_unkn_cp: Optional[PaddedPeakList] = None,
+		*,
 		output_dir: PathPlus,
 		) -> None:
 	"""
-	Write out spectra data for each peak in the aligned projects and unknown."""
+	Write out spectra data for each peak in the aligned projects and unknown.
+	"""
 
 	for json_data in data.get_spectra_data(
 			p1=p1,
@@ -91,8 +93,9 @@ def make_csv_reports(
 		padded_p1_cp: PaddedPeakList,
 		p2: Project,
 		padded_p2_cp: PaddedPeakList,
-		u: Project,
-		padded_unkn_cp: PaddedPeakList,
+		u: Optional[Project] = None,
+		padded_unkn_cp: Optional[PaddedPeakList] = None,
+		*,
 		output_dir: PathPlus,
 		) -> None:
 
@@ -126,14 +129,40 @@ def make_csv_reports(
 def get_mass_spectra(
 		project1: Project,
 		project2: Project,
-		unknown: Project,
+		unknown: Optional[Project],
 		output_dir: PathPlus,
 		) -> None:
-	A1 = align_projects([project1, project2], (unknown, ), D=5)
-	(padded_p1_cp, padded_p2_cp), (padded_unkn_cp, ) = get_padded_peak_lists(A1, [project1, project2], (unknown, ))
 
-	make_csv_reports(project1, padded_p1_cp, project2, padded_p2_cp, unknown, padded_unkn_cp, output_dir)
-	get_spectra_data(project1, padded_p1_cp, project2, padded_p2_cp, unknown, padded_unkn_cp, output_dir)
+	if unknown:
+		A1 = align_projects([project1, project2], (unknown, ), D=5)
+		(padded_p1_cp, padded_p2_cp), (padded_unkn_cp, ) = get_padded_peak_lists(
+				A1,
+				[project1, project2],
+				(unknown, ),
+				)
+	else:
+		A1 = align_projects([project1, project2], D=5)
+		(padded_p1_cp, padded_p2_cp), () = get_padded_peak_lists(A1, [project1, project2])
+		padded_unkn_cp = None
+
+	make_csv_reports(
+			project1,
+			padded_p1_cp,
+			project2,
+			padded_p2_cp,
+			unknown,
+			padded_unkn_cp,
+			output_dir=output_dir,
+			)
+	get_spectra_data(
+			project1,
+			padded_p1_cp,
+			project2,
+			padded_p2_cp,
+			unknown,
+			padded_unkn_cp,
+			output_dir=output_dir,
+			)
 
 
 def _json_filename_to_html(filename: PathPlus) -> str:
@@ -235,10 +264,19 @@ class Comparison(TypedDict):
 	project2: str
 
 	#: The unknown sample for comparison
-	unknown: str
+	unknown: Optional[str]
 
 	#: Output directory for this comparison.
 	output_dir: str
+
+	# Optional name for project1. Useful if two projects with the same name are being compared.
+	project1_name_override: Optional[str]
+
+	# Optional name for project2. Useful if two projects with the same name are being compared.
+	project2_name_override: Optional[str]
+
+	# Optional name for unknown. Useful if two projects with the same name are being compared.
+	unknown_name_override: Optional[str]
 
 
 # def download_assets(output_dir: PathPlus):
@@ -296,8 +334,30 @@ def process_comparison(
 		d3js, mpl3js = mpld3.urls.D3_URL, mpld3.urls.MPLD3MIN_URL
 
 	project1 = Project.from_file(comparison["project1"])
+	project1_name_override = comparison.get("project1_name_override")
+	if project1_name_override:
+		project1.name = project1_name_override
+
 	project2 = Project.from_file(comparison["project2"])
-	unknown = Project.from_file(comparison["unknown"])
+	project2_name_override = comparison.get("project2_name_override")
+	if project2_name_override:
+		project2.name = project2_name_override
+
+	if project2.name == project1.name:
+		project2.name = f"{project2.name} (1)"
+
+	if "unknown" in comparison:
+		assert comparison["unknown"] is not None
+		unknown = Project.from_file(comparison["unknown"])
+		unknown_name_override = comparison.get("unknown_name_override")
+		if unknown_name_override:
+			unknown.name = unknown_name_override
+
+		if unknown.name == project1.name:
+			unknown.name = f"{unknown.name} (1)"
+
+	else:
+		unknown = None
 
 	get_mass_spectra(project1, project2, unknown, output_dir)
 	del project1
