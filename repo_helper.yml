@@ -33,16 +33,16 @@ classifiers:
  - 'Topic :: Software Development :: Libraries :: Python Modules'
 
 
-# github_ci_requirements:
-#  Linux:
-#   post:
-#    - sudo add-apt-repository universe
-#    - sudo apt update
-#    - sudo apt install libhdf5-dev netcdf-bin libnetcdf-dev
-#  Windows:
-#   post:
-#    # Prefery binary wheels for older versions over sdists for newer ones
-#    - pip config set global.prefer-binary true
+github_ci_requirements:
+ Linux:
+  post:
+   - sudo add-apt-repository universe
+   - sudo apt update
+   - sudo apt install libhdf5-dev netcdf-bin libnetcdf-dev
+ Windows:
+  post:
+   # Prefery binary wheels for older versions over sdists for newer ones
+   - pip config set global.prefer-binary true
 
 # sphinx_html_theme: furo
 # standalone_contrib_guide: true
