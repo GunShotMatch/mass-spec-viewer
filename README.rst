@@ -67,7 +67,7 @@ mass-spec-viewer
 	:target: https://github.com/GunShotMatch/mass-spec-viewer/commit/master
 	:alt: GitHub last commit
 
-.. |maintained| image:: https://img.shields.io/maintenance/yes/2024
+.. |maintained| image:: https://img.shields.io/maintenance/yes/2025
 	:alt: Maintenance
 
 .. end shields
