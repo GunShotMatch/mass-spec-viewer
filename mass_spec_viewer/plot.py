@@ -36,6 +36,7 @@ from typing import Dict, List, cast
 import mpld3  # type: ignore[import-untyped]
 import numpy
 from domdf_python_tools.stringlist import StringList
+from domdf_python_tools.words import truncate_string
 from matplotlib import cm as colourmaps  # type: ignore[import-untyped]
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes  # type: ignore[import-untyped]
@@ -146,7 +147,7 @@ def plot_spectra(json_data: JSONData) -> Figure:
 
 			add_html_tooltips(fig, draw_ms(ax, *spectrum), spectrum[0])
 			max_mass = max(max_mass, get_max_mass(*spectrum))
-			ax.set_title(f"{project_name} – {peak_info['name']} @ {peak_info['rt']:0.3f} min")
+			ax.set_title(f"{project_name} – {truncate_string(peak_info['name'], 70)} @ {peak_info['rt']:0.3f} min")
 		else:
 			ax.set_xlabel("m/z")
 			ax.set_ylabel("Intensity")
@@ -163,7 +164,7 @@ def plot_spectra(json_data: JSONData) -> Figure:
 					reference_ms["mass_list"],
 					)
 			max_mass = max(max_mass, get_max_mass(reference_ms["mass_list"], reference_ms["intensity_list"]))
-			ax.set_title(f"Reference – {peak_info['reference_data']['name']}")
+			ax.set_title(f"Reference – {truncate_string(peak_info['reference_data']['name'], 70)}")
 		else:
 			ax.set_xlabel("m/z")
 			ax.set_ylabel("Intensity")
@@ -224,7 +225,7 @@ def plot_scores(json_data: JSONData, row_num: int) -> Figure:
 
 	for sample_name in forward_scores:
 		peak_data = cast(PeakData, json_data["peak"][sample_name] or {})
-		compound = peak_data.get("name", '')
+		compound = truncate_string(peak_data.get("name", '').strip(), 30)
 
 		label = f"{sample_name}\n{compound}".strip()
 		grid_labels.append(label)
@@ -246,7 +247,7 @@ def plot_scores(json_data: JSONData, row_num: int) -> Figure:
 
 	for sample_name in forward_scores:
 		peak_data = cast(PeakData, json_data["peak"][sample_name] or {})
-		compound = peak_data.get("name", '')
+		compound = truncate_string(peak_data.get("name", '').strip(), 30)
 		label = f"{sample_name}\n{compound}".strip()
 		grid_labels.append(label)
 
