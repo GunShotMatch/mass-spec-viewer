@@ -133,6 +133,13 @@ def draw_ms(ax: Axes, mass_list: List[int], intensity_list: List[float]) -> BarC
 
 
 def plot_spectra(json_data: JSONData) -> Figure:
+	"""
+	Plot mass spectra from the given data.
+
+	:param json_data:
+
+	:returns: The figure the spectrum was plotted on. Figure size 16.5" x 9".
+	"""
 
 	# fig, axes = plt.subplots(3, 2, figsize=(16.5, 11.7), layout="constrained")
 	fig, axes = plt.subplots(len(json_data["peak"]), 2, figsize=(16.5, 9), layout="constrained")
@@ -217,6 +224,18 @@ def make_similarity_grid(ax: Axes, scores: Dict[str, Dict[str, float]], labels: 
 
 
 def plot_scores(json_data: JSONData, row_num: int) -> Figure:
+	"""
+	Plot mass spectral similarity scores calculated from the given data.
+
+	Four grids are plotted. The top two grids show forward and reverse match factors for the experimental spectra against reference spectra for the top hits.
+	The bottom two grids show forward and reverse match factors for the experimental spectra against experimental spectra.
+	Comparing a spectrum to itself gives are score of 1000, so these are de-emphasised for ease of reading.
+
+	:param json_data:
+
+	:returns: The figure the spectrum was plotted on. Figure size 10" x 11".
+	"""
+
 	# fig, axes = plt.subplots(2, 2, figsize=(8, 9), layout="constrained", sharey=True)
 	fig, axes = plt.subplots(2, 2, figsize=(10, 11), layout="constrained", sharey=True)
 
@@ -270,6 +289,12 @@ def plot_scores(json_data: JSONData, row_num: int) -> Figure:
 
 
 def format_top_masses_html_table(top_masses_data: TopMassesData) -> str:
+	"""
+	Format data on the most intense fragment masses in the mass spectra as an HTML table.
+
+	:param top_masses_data:
+	"""
+
 	output = []
 	output.append("<table>\n  <tbody>")
 

@@ -317,6 +317,12 @@ def get_top_masses(mass_list: List[int], intensity_list: List[float]) -> Iterato
 
 
 def get_top_masses_data(json_data: JSONData) -> TopMassesData:
+	"""
+	Calculate the most intense mass fragments for each project in the given data.
+
+	:param json_data:
+	"""
+
 	top_masses_data = []
 
 	for project_name, spectrum in json_data["ms"].items():
@@ -371,7 +377,7 @@ def get_spectra_data(
 	:param p1: The first project
 	:param padded_p1_cp: List of consolidated peaks for the first project,
 		padded to align with the other project's and the unknown's.
-	:param p2: The first project
+	:param p2: The second project
 	:param padded_p2_cp: List of consolidated peaks for the second project,
 		padded to align with the other project's and the unknown's.
 	:param u: The unknown sample
@@ -481,6 +487,16 @@ def csv_reports(
 		u: Optional[Project] = None,
 		padded_unkn_cp: Optional[PaddedPeakList] = None,
 		) -> Tuple[Tuple[CSVReportRow, CSVReportRow], List[Tuple[CSVReportRow, bool]]]:
+	"""
+	Generate CSV reports showing the alignment between the two reference profiles and the unknown.
+
+	:param p1: The first project.
+	:param padded_p1_cp: The peak list for the first project, padded to ensure alignment with the other peak lists.
+	:param p2: The second project.
+	:param padded_p2_cp: The peak list for the second project, padded to ensure alignment with the other peak lists.
+	:param u: The unknown sample.
+	:param padded_unkn_cp: The peak list for the unknown sample, padded to ensure alignment with the other peak lists.
+	"""
 
 	p1_max_pa = _max_peak_area(p1)
 	p2_max_pa = _max_peak_area(p2)

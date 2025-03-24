@@ -73,6 +73,17 @@ def get_spectra_data(
 		) -> None:
 	"""
 	Write out spectra data for each peak in the aligned projects and unknown.
+
+	:param p1: The first project
+	:param padded_p1_cp: List of consolidated peaks for the first project,
+		padded to align with the other project's and the unknown's.
+	:param p2: The second project
+	:param padded_p2_cp: List of consolidated peaks for the second project,
+		padded to align with the other project's and the unknown's.
+	:param u: The unknown sample
+	:param padded_unkn_cp: List of consolidated peaks for the unknown,
+		padded to align with the projects'.
+	:param output_dir: The directory to write the JSON files into.
 	"""
 
 	for json_data in data.get_spectra_data(
@@ -98,6 +109,17 @@ def make_csv_reports(
 		*,
 		output_dir: PathPlus,
 		) -> None:
+	"""
+	Generate CSV reports showing the alignment between the two reference profiles and the unknown.
+
+	:param p1: The first project.
+	:param padded_p1_cp: The peak list for the first project, padded to ensure alignment with the other peak lists.
+	:param p2: The second project.
+	:param padded_p2_cp: The peak list for the second project, padded to ensure alignment with the other peak lists.
+	:param u: The unknown sample.
+	:param padded_unkn_cp: The peak list for the unknown sample, padded to ensure alignment with the other peak lists.
+	:param output_dir: The directory to write the CSV files into.
+	"""
 
 	csv_header, csv_data = data.csv_reports(p1, padded_p1_cp, p2, padded_p2_cp, u, padded_unkn_cp)
 
@@ -132,6 +154,14 @@ def get_mass_spectra(
 		unknown: Optional[Project],
 		output_dir: PathPlus,
 		) -> None:
+	"""
+	Write CSV reports of the alignment between the projects and unknown, and JSON files giving the spectra for the individual peaks.
+
+	:param project1: The first project
+	:param project2: The second project
+	:param unknown: The unknown sample
+	:param output_dir: The directory to write the CSV files into.
+	"""
 
 	if unknown:
 		A1 = align_projects([project1, project2], (unknown, ), D=5)
@@ -208,6 +238,15 @@ def draw_mass_spectra(
 		d3_url: str = mpld3.urls.D3_URL,
 		mpld3_url: str = mpld3.urls.MPLD3MIN_URL,
 		) -> None:
+	"""
+	Plot mass spectra to PNG files.
+
+	:param output_dir: The directory in which the :file:`*_spectra.json` files are to be found, and in which the PNG files are to be written.
+	:param jobs: The number of jobs to use, to allow for parallel execution.
+	:param d3_url: URL to use for the ``d3.js`` library.
+	:param mpld3_url: URL to use for the mpld3 library.
+	"""
+
 	filenames = natsorted(output_dir.glob("*_spectra.json"))
 
 	if jobs == 1:
@@ -257,6 +296,10 @@ def make_index_html(
 
 
 class Comparison(TypedDict):
+	"""
+	Represents a comparison between the projects and unknown.
+	"""
+
 	#: The True class.
 	project1: str
 

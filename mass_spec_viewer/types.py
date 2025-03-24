@@ -49,24 +49,58 @@ IntensityList = List[float]
 
 
 class ReferenceData(TypedDict):
+	"""
+	Represents reference mass spectrometry data, such as from the NIST Library.
+	"""
+
+	#: The compound name.
 	name: str
+
+	#: The compound's Chemical Abstracts Service Registry Number.
 	cas: str
+
+	#: The compound's chemical formula.
 	formula: str
+
+	#: The contributor of the reference data.
 	contributor: str
+
+	#: The NIST number of the compound.
 	nist_no: int
+
+	#: Identification string (e.g. library primary key) for the compound.
 	id: str
+
+	#: The compound's molecular weight.
 	mw: int
+
+	#: The compound's exact mass.
 	exact_mass: float
+
+	#: List of synonyms of the compound's name.
 	synonyms: List[str]
+
+	#: The compound's mass spectrum. TODO: Structure?
 	mass_spec: Dict[str, List[int]]
 
 
 class PeakData(TypedDict):
+	"""
+	Represents data for a peak.
+	"""
+
 	peak_no: int
 	name: str
-	rt: float  # mins
+
+	#: The retention time in minutes.
+	rt: float
+
+	#: The peak area.
 	area: float
+
+	#: The peak area as a percentage.
 	area_percentage: float
+
 	match_factor: float
 	reference_data: Dict[str, Any]
 
