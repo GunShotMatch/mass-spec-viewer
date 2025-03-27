@@ -106,6 +106,10 @@ class PeakData(TypedDict):
 
 
 class JSONData(TypedDict):
+	"""
+	Represents a peak in the JSON output files.
+	"""
+
 	row: int
 	peak: MutableMapping[str, Optional[PeakData]]
 	ms: Dict[str, Tuple[MassList, IntensityList]]

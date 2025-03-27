@@ -367,6 +367,15 @@ def process_comparison(
 		jobs: int = 1,
 		should_copy_assets: bool = False,
 		) -> None:
+	"""
+	Produce HTML, PNG and JSON files for the given comparison.
+
+	:param comparison:
+	:param jobs: The number of jobs to use, to allow for parallel execution.
+	:param should_copy_assets: Whether to copy the Bootstrap CSS, d3.js, and mpl3 Javascript files into the output directory,
+		to allow for offline viewing.
+	"""
+
 	output_dir = PathPlus(comparison["output_dir"])
 	output_dir.maybe_make(parents=True)
 
