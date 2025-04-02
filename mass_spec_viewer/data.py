@@ -469,13 +469,13 @@ def _get_csv_header(p1: Project, p2: Project, u: Optional[Project]) -> Tuple[CSV
 
 	if u:
 		return (
-				('', p1.name, *top_row_pad, u.name, *top_row_pad, p2.name, *top_row_pad),
-				('', ) + CSVRow.header() * 3,
+				['', p1.name, *top_row_pad, u.name, *top_row_pad, p2.name, *top_row_pad],
+				['', *(CSVRow.header() * 3)],
 				)
 	else:
 		return (
-				('', p1.name, *top_row_pad, p2.name, *top_row_pad, '', *top_row_pad),
-				('', ) + CSVRow.header() * 3,
+				['', p1.name, *top_row_pad, p2.name, *top_row_pad],
+				['', *(CSVRow.header() * 2)],
 				)
 
 
@@ -520,10 +520,10 @@ def csv_reports(
 		row: CSVReportRow
 		if u:
 			unknown_data = get_csv_data(u, cpu, unkn_max_pa)
-			row = (str(idx), *cp1_data, *unknown_data, *cp2_data)
+			row = [str(idx), *cp1_data, *unknown_data, *cp2_data]
 			csv_data.append((row, sum(tuple(map(all, [cp1_data, cp2_data, unknown_data]))) >= 2))
 		else:
-			row = (str(idx), *cp1_data, *cp2_data, '', '', '', '', '', '')
+			row = [str(idx), *cp1_data, *cp2_data]
 			csv_data.append((row, True))
 
 	return csv_header, csv_data

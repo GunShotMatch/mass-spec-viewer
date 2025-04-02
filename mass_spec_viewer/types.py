@@ -117,24 +117,4 @@ class JSONData(TypedDict):
 
 TopMassesData = List[List[Tuple[str, str, str, str]]]
 
-CSVReportRow = Tuple[
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str,
-	str
-	]
+CSVReportRow = List[str]
