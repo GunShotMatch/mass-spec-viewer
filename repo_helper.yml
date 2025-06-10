@@ -12,7 +12,8 @@ short_desc: 'Combined spectrum viewer and comparison tool.'
 
 enable_devmode: false
 enable_conda: false
-mypy_version: "1.8.0"
+mypy_version: 1.16
+python_deploy_version: 3.9
 use_whey: true
 on_pypi: false
 enable_tests: false

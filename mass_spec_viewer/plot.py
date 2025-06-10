@@ -30,20 +30,20 @@ Plotting functions.
 import itertools
 import json
 import re
-from typing import Dict, List, cast
+from typing import Any, Dict, List, cast
 
 # 3rd party
+import matplotlib
 import mpld3  # type: ignore[import-untyped]
 import numpy
 from domdf_python_tools.stringlist import StringList
 from domdf_python_tools.words import truncate_string
-from matplotlib import cm as colourmaps  # type: ignore[import-untyped]
 from matplotlib import pyplot as plt
-from matplotlib.axes import Axes  # type: ignore[import-untyped]
-from matplotlib.container import BarContainer  # type: ignore[import-untyped]
-from matplotlib.figure import Figure  # type: ignore[import-untyped]
-from matplotlib.image import AxesImage  # type: ignore[import-untyped]
-from matplotlib.ticker import MultipleLocator  # type: ignore[import-untyped]
+from matplotlib.axes import Axes
+from matplotlib.container import BarContainer
+from matplotlib.figure import Figure
+from matplotlib.image import AxesImage
+from matplotlib.ticker import MultipleLocator
 from mpld3 import plugins
 from mpld3.mpld3renderer import MPLD3Renderer  # type: ignore[import-untyped]
 from mpld3.mplexporter import Exporter  # type: ignore[import-untyped]
@@ -194,7 +194,7 @@ def make_similarity_grid(ax: Axes, scores: Dict[str, Dict[str, float]], labels: 
 
 	grid_data = [list(v.values()) for v in scores.values()]
 
-	im = ax.imshow(grid_data, cmap=colourmaps.Blues, vmin=0, vmax=1000)
+	im = ax.imshow(grid_data, cmap=matplotlib.colormaps["Blues"], vmin=0, vmax=1000)
 
 	# Show all ticks and label them with the respective list entries
 	ax.set_xticks(numpy.arange(len(labels)), labels=labels)
@@ -204,13 +204,17 @@ def make_similarity_grid(ax: Axes, scores: Dict[str, Dict[str, float]], labels: 
 	plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 
 	thresh = 500
+	assert im.cmap is not None
+	assert im.cmap is not None
 	cmap_min, cmap_max = im.cmap(0), im.cmap(1.0)
 
 	# Loop over data dimensions and create text annotations.
 	for i in range(len(labels)):
 		for j in range(len(labels)):
 			color = cmap_max if grid_data[i][j] < thresh else cmap_min
-			kwds = dict(ha="center", va="center", color=color)
+
+			# Ref: https://github.com/python/mypy/issues/18481
+			kwds: Dict[str, Any] = dict(ha="center", va="center", color=color)
 			value = grid_data[i][j]
 
 			if value == -1:
@@ -283,7 +287,7 @@ def plot_scores(json_data: JSONData, row_num: int) -> Figure:
 	axes[1, 1].set_title("Reverse Match")
 
 	# fig.set_constrained_layout_pads(w_pad=0.1, h_pad=0.1, wspace=0, hspace=0)
-	fig.get_layout_engine().set(w_pad=0.1, h_pad=0.1, wspace=0, hspace=0)
+	fig.get_layout_engine().set(w_pad=0.1, h_pad=0.1, wspace=0, hspace=0)  # type: ignore[call-arg,union-attr]
 
 	return fig
 

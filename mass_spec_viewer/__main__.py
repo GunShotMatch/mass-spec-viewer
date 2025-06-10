@@ -57,7 +57,7 @@ def main(
 	"""
 
 	# 3rd party
-	import matplotlib  # type: ignore[import-untyped]
+	import matplotlib
 	matplotlib.use("Agg")
 
 	# 3rd party

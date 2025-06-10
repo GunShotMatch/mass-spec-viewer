@@ -39,7 +39,7 @@ from domdf_python_tools.compat import importlib_resources
 from domdf_python_tools.paths import PathPlus
 from libgunshotmatch.comparison import align_projects, get_padded_peak_lists
 from libgunshotmatch.project import Project
-from matplotlib import pyplot as plt  # type: ignore[import-untyped]
+from matplotlib import pyplot as plt
 from natsort import natsorted
 from tqdm import tqdm
 
