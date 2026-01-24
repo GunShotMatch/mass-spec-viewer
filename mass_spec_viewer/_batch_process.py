@@ -57,7 +57,7 @@ __all__ = [
 		"get_spectra_data",
 		"make_csv_reports",
 		"make_index_html",
-		"process_comparison"
+		"process_comparison",
 		]
 
 
@@ -195,7 +195,7 @@ def get_mass_spectra(
 			)
 
 
-def _json_filename_to_html(filename: PathPlus) -> str:
+def _json_filename_to_html(filename: PathPlus) -> str:  # noqa: PRM002
 	"""
 	Return the HTML filename corresponding to the given spectrum JSON filename.
 	"""
@@ -271,8 +271,6 @@ def make_index_html(
 	Write the ``index.html`` page with an overview table of compounds and retention times.
 
 	:param output_dir: Directory conaining \*.spectra.json files and in which to place the ``index.html`` file.
-	:param table_data: For each tuple the first element is the row number,
-		the second is list of tuples of (retention time, compound name).
 	:param bootstrap_css_url: Optional URL for boostrap css. May include additional HTML attributes for the ``link`` tag.
 	"""
 

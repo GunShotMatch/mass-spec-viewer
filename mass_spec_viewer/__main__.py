@@ -43,7 +43,7 @@ __all__ = ["main"]
 		"--copy-assets",
 		"should_copy_assets",
 		help="Copy CSS and JS assets for future offline use.",
-		default=False
+		default=False,
 		)
 @consolekit.click_command()
 def main(

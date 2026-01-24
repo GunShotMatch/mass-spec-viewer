@@ -59,7 +59,7 @@ __all__ = [
 		"format_top_masses_html_table",
 		"make_similarity_grid",
 		"plot_scores",
-		"plot_spectra"
+		"plot_spectra",
 		]
 
 html_tooltip_css = """
@@ -175,7 +175,7 @@ def plot_spectra(json_data: JSONData) -> Figure:
 		else:
 			ax.set_xlabel("m/z")
 			ax.set_ylabel("Intensity")
-			ax.set_title(f"No Peak")
+			ax.set_title("No Peak")
 
 	for ax in [*experimental_axes, *reference_axes]:
 		ax.set_xlim(45, max_mass + 5)
@@ -236,6 +236,7 @@ def plot_scores(json_data: JSONData, row_num: int) -> Figure:
 	Comparing a spectrum to itself gives are score of 1000, so these are de-emphasised for ease of reading.
 
 	:param json_data:
+	:param row_num:
 
 	:returns: The figure the spectrum was plotted on. Figure size 10" x 11".
 	"""
@@ -365,7 +366,7 @@ def _fig_to_html(fig: Figure, d3_url: str, mpld3_url: str) -> str:
 			figure_json=figure_json,
 			extra_css=extra_css,
 			extra_js=extra_js,
-			include_libraries=True
+			include_libraries=True,
 			)
 
 

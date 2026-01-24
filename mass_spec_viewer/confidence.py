@@ -88,7 +88,7 @@ def calculate_confidence(reference_profile: Project, unknown: Project) -> float:
 	"""
 	Calculate the confidence metric for similarity of profiles.
 
-	:param referece_profile:
+	:param reference_profile:
 	:param unknown:
 	"""
 

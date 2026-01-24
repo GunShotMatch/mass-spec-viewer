@@ -63,7 +63,7 @@ __all__ = [
 		"get_top_masses",
 		"get_top_masses_data",
 		"get_within_similarity",
-		"normalize_intensities"
+		"normalize_intensities",
 		]
 
 
@@ -94,8 +94,8 @@ class PeakInfo(NamedTuple):
 		"""
 		Create :class:`~.PeakInfo` for the given peak.
 
-		:param project:
 		:param peak:
+		:param peak_no:
 		:param max_area: The area of the largest peak.
 		"""
 
@@ -155,7 +155,7 @@ class SimilarityScores(NamedTuple):
 			else:
 				ref_spec_array = numpy.array([
 						sample_peak_info["reference_data"]["mass_spec"]["mass_list"],
-						sample_peak_info["reference_data"]["mass_spec"]["intensity_list"]
+						sample_peak_info["reference_data"]["mass_spec"]["intensity_list"],
 						])
 				reference_spectra[sample] = ref_spec_array.transpose()
 
@@ -309,7 +309,7 @@ def get_top_masses(mass_list: List[int], intensity_list: List[float]) -> Iterato
 	result = sorted(
 			ms_dict,
 			key=ms_dict.get,  # type: ignore[arg-type]
-			reverse=True
+			reverse=True,
 			)
 
 	for mass in result[:10]:
@@ -411,7 +411,7 @@ def get_spectra_data(
 				(p1, p1_peak, p1_combined_spectrum, p1_max_pa),
 				(u, unkn_peak, unkn_combined_spectrum, unkn_max_pa),
 				(p2, p2_peak, p2_combined_spectrum, p2_max_pa),
-				]:
+			]:
 				assert project.consolidated_peaks is not None
 
 				ms_data[project.name] = spec
@@ -435,7 +435,7 @@ def get_spectra_data(
 			for project, peak, spec, max_area in [
 				(p1, p1_peak, p1_combined_spectrum, p1_max_pa),
 				(p2, p2_peak, p2_combined_spectrum, p2_max_pa),
-				]:
+			]:
 				assert project.consolidated_peaks is not None
 
 				ms_data[project.name] = spec
